@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-7_io4l(hm43-q^hz0p)upyp2t37nkx6ifx0(5tn58_g4b$(xpp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -37,7 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'api',
+    'frontend',
+    'rest_framework',
+    'channels',
+    'chat',
 ]
+
+ASGI_APPLICATION = 'vchat.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -123,3 +130,14 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            # "hosts": [('127.0.0.1', 6379)],
+            'hosts':[('redis://:sj8eLJ5u8VX6H7aWCrdBiEuBCP3gL24t@redis-15745.c258.us-east-1-4.ec2.cloud.redislabs.com:15745')],
+        },
+    },
+}
