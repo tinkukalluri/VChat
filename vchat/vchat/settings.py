@@ -46,6 +46,9 @@ INSTALLED_APPS = [
 
 ASGI_APPLICATION = 'vchat.asgi.application'
 
+CSRF_COOKIE_HTTPONLY = False
+CSRF_USE_SESSIONS=False
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
