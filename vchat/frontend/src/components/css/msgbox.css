@@ -1,0 +1,27 @@
+
+*{
+    box-sizing: border-box;
+}
+
+.container{
+    font-family: sans-serif;
+    font-size:27px;
+    font-weight:normal;
+    font-style:italic;
+}
+
+
+.user-sender{
+    
+    display: flex; 
+    justify-content: flex-end;
+    position: relative;
+}
+
+
+.contact-sender{
+    
+    display: flex; 
+    justify-content: flex-start;
+    position: relative;
+}

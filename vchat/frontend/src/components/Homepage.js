@@ -18,7 +18,7 @@ export default function HomePage(props) {
 
 
     return (
-        <div>
+        <div className='container-homepage'>
             < Grid container spacing={1} >
                 <Grid iteam xs={4}>
                 </Grid>

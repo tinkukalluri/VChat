@@ -41,3 +41,4 @@ sortable.sort(function (a, b) {
 });
 
 console.log(sortable)
+console.log(maxSpeed.car)

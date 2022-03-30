@@ -34,6 +34,7 @@ export default function Contacts(props) {
     const [myId, setMyId] = useState(-1)
     const [friends, setFriends] = useState({})
     const [fetchmsg, setFetchMsg] = useState({})
+    const [sortedMsg, setSortedMsg] = useState({})
 
     useEffect(() => {
         // because we only want this to happen once when the component is
@@ -101,12 +102,13 @@ export default function Contacts(props) {
         }).then((data) => {
             console.log(data);
             setFetchMsg(data);
-            useEffect(() => {
-                msgIdSort()
-            }, [fetchmsg])
+            // msgIdSort()
         })
     }
 
+    useEffect(() => {
+        msgIdSort()
+    }, [fetchmsg])
 
     function renderContactsButtons() {
         var btn = []
@@ -146,19 +148,22 @@ export default function Contacts(props) {
             return a[0] - b[0]
             // return b[0] - a[0]
         })
-        console.log("after sorting", entries)
+        data = Object.fromEntries(entries)
+        console.log("after sorting object", data)
+        setSortedMsg(data)
     }
+
 
 
 
     return (
         <div className="container">
             <Grid container spacing={1} >
-                <Grid item xs={6}>
+                <Grid item xs={4}>
                     {renderContactsButtons()}
                 </Grid>
-                <Grid item xs={6}>
-                    <MsgBox msgs={fetchmsg} />
+                <Grid item xs={8}>
+                    <MsgBox msgs={sortedMsg} myid={myId} />
                 </Grid>
             </Grid>
         </div>
