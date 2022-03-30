@@ -17,10 +17,10 @@ export default function Routers(props) {
     return (
         <Router>
             <Switch>
+                <Route exact path='/contacts' component={Contacts} />
                 <Route exact path="/login" component={Login} />
                 <Route exact path="/signup" component={SignUp} />
                 <Route exact path='' component={HomePage} />
-                <Route exact path='/contacts' component={Contacts} />
             </Switch>
         </Router>
     );

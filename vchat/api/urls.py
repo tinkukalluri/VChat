@@ -15,5 +15,6 @@ urlpatterns = [
 
     # here its view_2.py path sets 
     path('myid' , views_2.MyId.as_view()),
-    path('friends' , views_2.Friends.as_view()),
+    path('friends' , views_2.FriendsList.as_view()),
+    path('fetchmsgs' , views_2.FetchMessages.as_view()),
 ]

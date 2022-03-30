@@ -1,5 +1,10 @@
 
+.btn-contact{
 
-h1{
-    color:red
+}
+
+._MuiButton-outlinedSizeLarge {
+    padding: 7px 21px;
+    font-size: 0.9375rem;
+    width: 100% !important;
 }

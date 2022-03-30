@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 # Create your models here.
 
 
@@ -9,7 +10,16 @@ class Messages(models.Model):
     text=models.TextField()
     delivered=models.BooleanField()
     seen=models.BooleanField()
-    send_on=models.DateTimeField(auto_now_add=True)
+    send_on=models.DateTimeField()
+
+    def save(self, *args, **kwargs):
+        ''' On save, update timestamps '''
+        # converting utc to itc , the gap is 5.5 hours
+        self.send_on=timezone.now() + timezone.timedelta(hours=5.5)
+        print("timezome.now()::", self.send_on)
+        #     self.created = timezone.now()
+        # self.modified = timezone.now()
+        return super(Messages , self).save(*args, **kwargs)
 
 
 class Friends(models.Model):

@@ -61,6 +61,7 @@ class Logout(APIView):
             return Response({"status": True} , status=status.HTTP_200_OK)
         if "key" in self.request.session:
             s_id = self.request.session.pop("key" , None)
+            s_id= self.request.session.pop("user_id" , None)
             return Response({"status": True} , status=status.HTTP_200_OK)
         return Response({"status": True} , status=status.HTTP_200_OK)
 
@@ -68,7 +69,8 @@ class UserInRoom(APIView):
     def get(self, request,format=None):
         print(self.request.session)
         print(self.request.session.session_key)
-        print(self.request.session.get('key'))
+        print("session_key:::"+self.request.session.get('key'))
+        print("session_key::"+request.session.get('key'))
         print("user in room:"+str((self.request.session.get('key')!=None)))
         if(self.request.session.get('key')):
             return Response({"status": True} , status=status.HTTP_200_OK)
@@ -77,7 +79,11 @@ class UserInRoom(APIView):
 
 
 
-
+def loggedIn(request):
+        if(request.session.get('key') and request.session.get('user_id')):
+            return True
+        else:
+            return False
 
 
 
