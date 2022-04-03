@@ -5,6 +5,9 @@ import { TextField, Grid, Button, ButtonGroup, Typography, FormControlLabel, Che
 import { Link } from "react-router-dom";
 
 import './css/msgbox.css'
+import img from "./images/1.jpeg"
+
+
 
 export default function MsgBox(props) {
 
@@ -38,18 +41,24 @@ export default function MsgBox(props) {
         let myid = props.myid;
         if (myid === entries[msg][1].msg_from) {
             return (
-                <div className="container">
-                    <div className="user-sender">
+                <div class="container sender">
+                    <img class="right" src={img} alt="sender" />
+                    <div class="user-sender">
                         {entries[msg][1].text}
                     </div>
+                    <span class="time-left">{entries[msg][1].send_on}</span>
                 </div>
             )
         } else
             return (
-                <div className="container">
-                    <div className="contact-sender">
+                <div class="container receiver">
+                    {console.log("process.env::", process.env)}
+                    <img class="left" src={process.env.PUBLIC_URL + "images/1.jpeg"} alt="reciver" />
+                    <div class="contact-sender">
                         {entries[msg][1].text}
                     </div>
+                    {/* <div class="time-right">{entries[msg][1].send_on}</div> */}
+                    <span class="time-right">{entries[msg][1].send_on}</span>
                 </div>
             )
     }
@@ -59,7 +68,9 @@ export default function MsgBox(props) {
         <>
             <Grid container spacing={1} >
                 <Grid item xs={12}>
+
                     {renderMsgs()}
+
                 </Grid>
             </Grid>
         </>

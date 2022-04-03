@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -8,8 +9,8 @@ class Messages(models.Model):
     msg_to=models.ForeignKey(User ,on_delete=models.CASCADE , related_name='msg_to_rel')
     msg_from= models.ForeignKey(User ,on_delete=models.CASCADE , related_name='msg_from_rel')
     text=models.TextField()
-    delivered=models.BooleanField()
-    seen=models.BooleanField()
+    delivered=models.BooleanField(default=False)
+    seen=models.BooleanField(default=False)
     send_on=models.DateTimeField()
 
     def save(self, *args, **kwargs):

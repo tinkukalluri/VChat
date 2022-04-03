@@ -6,18 +6,22 @@
 
 html,
 body {
-    height: 100%;
     margin: 0;
     padding: 0;
     border: 0;
+    margin: 0 auto;
+    padding: 0 20px;
+    max-width: 100vw;
+    max-height: 100vh;
+    background-color:#343a40;
     /* background-color:#1ED760; */
 }
 
 #main {
     /* display:flex;
     justify-content:center;
-    align-items: center; */
+    align-items: center; 
     width: 100%;
-    height: 100%;
-    text-align: center;
+    height: 100%; 
+    text-align: center; */
 } 

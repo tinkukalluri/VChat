@@ -3,8 +3,15 @@
 
 }
 
+/* to increase the width of button */
 ._MuiButton-outlinedSizeLarge {
     padding: 7px 21px;
     font-size: 0.9375rem;
     width: 100% !important;
+}
+
+
+.contacts-container{
+    width: 100%;
+    
 }

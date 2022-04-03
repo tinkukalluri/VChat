@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 
 
 import css from "./css/contacts.css";
+import "./css/msgbox.css";
 
 
 import MsgBox from "./MsgBox.js"
@@ -28,13 +29,20 @@ function getCookie(name) {
     return cookieValue;
 }
 
+// Global variables
 var csrftoken = ""
 var count = 0;
+var _contact_id = -1;
+var scrolled = false;
+
 export default function Contacts(props) {
     const [myId, setMyId] = useState(-1)
     const [friends, setFriends] = useState({})
     const [fetchmsg, setFetchMsg] = useState({})
     const [sortedMsg, setSortedMsg] = useState({})
+    const [inputText, setInputText] = useState('')
+    const [contact_id, setContactId] = useState(-1)
+    const [updateMsgs, setUpdateMsgs] = useState(false)
 
     useEffect(() => {
         // because we only want this to happen once when the component is
@@ -86,15 +94,22 @@ export default function Contacts(props) {
         })
     }
 
+
+
     function handleContactButton(e) {
-        var contact_id = e.currentTarget.value;
+        console.log(typeof e.currentTarget)
+        if (typeof e.currentTarget !== 'undefined') {
+            console.log("got into e.currentTarget.value")
+            _contact_id = e.currentTarget.value
+            setContactId(e.currentTarget.value);
+        }
         const request = new Request("/api/fetchmsgs", {
             method: 'POST',
             headers: { "Content-Type": "application/json", 'X-CSRFToken': csrftoken },
             mode: 'same-origin',// Do not send CSRF token to another domain.
             body: JSON.stringify({
                 "user_id": myId,
-                'contact_id': contact_id
+                'contact_id': _contact_id
             })
         })
         fetch(request).then((response) => {
@@ -102,6 +117,8 @@ export default function Contacts(props) {
         }).then((data) => {
             console.log(data);
             setFetchMsg(data);
+            setUpdateMsgs(false);
+            scrolled = false;
             // msgIdSort()
         })
     }
@@ -110,35 +127,6 @@ export default function Contacts(props) {
         msgIdSort()
     }, [fetchmsg])
 
-    function renderContactsButtons() {
-        var btn = []
-        console.log("keys::" + Object.keys(friends))
-        console.log("keys::" + Object.values(friends))
-        var entries = Object.entries(friends)
-        console.log(entries);
-        for (var friend in entries) {
-            // console.log(friend)
-            btn.push(
-
-                <Button className="btn-contact _MuiButton-outlinedSizeLarge" onClick={handleContactButton}
-                    variant="outlined"
-                    color="primary"
-                    value={entries[friend][0]}
-                    size="large"
-                // key={friend[1]}
-                >{entries[friend][1]}</Button>);
-
-        }
-        console.log("btn", btn)
-        return <>
-            {btn}
-        </>;
-    }
-
-
-    function dateTimeSort() {
-
-    }
     //for time being i m using msgIdSort to sort my messages rathan then dateTimeSort()
     function msgIdSort() {
         let data = fetchmsg
@@ -154,18 +142,137 @@ export default function Contacts(props) {
     }
 
 
+    function renderContactsButtons() {
+        var btn = []
+        console.log("keys::" + Object.keys(friends))
+        console.log("keys::" + Object.values(friends))
+        var entries = Object.entries(friends)
+        console.log(entries);
+        for (var friend in entries) {
+            // console.log(friend)
+            btn.push(
+                <button class="btn-contacts" value={entries[friend][0]} onClick={handleContactButton}>
+                    <span><img src="../../images/4_c.jpeg" alt="photo" srcset="" /></span>
+                    <span class="btn-text">{entries[friend][1]}</span>
+                </button>
+            );
 
+        }
+        console.log("btn", btn)
+        return <>
+            {btn}
+        </>;
+    }
+
+
+    function dateTimeSort() {
+
+    }
+
+    function handleChangeInput(e) {
+        let input = e.target.value;
+        setInputText(input)
+        // console.log(input)
+    }
+
+    function handleTextSubmit() {
+        console.log("clicked......................")
+        const request = new Request("/api/inputtext", {
+            method: 'POST',
+            headers: { "Content-Type": "application/json", 'X-CSRFToken': csrftoken },
+            mode: 'same-origin',// Do not send CSRF token to another domain.
+            body: JSON.stringify({
+                "user_id": myId,
+                'contact_id': contact_id,
+                "text": inputText
+
+            })
+        })
+        fetch(request).then((response) => {
+            if (response.status === 200) {
+                return response.json();
+            } else {
+                conosle.log('looks like something went wrong')
+            }
+        }).then((data) => {
+            console.log(data)
+            handleContactButton({})
+            setInputText("")
+            setUpdateMsgs(true)
+        })
+    }
+
+    function updateScroll() {
+        var element = document.getElementById("yourDivID");
+        element.scrollTop = element.scrollHeight;
+    }
+
+    setInterval(updateScroll, 1000);
+
+    function updateScroll() {
+        if (!scrolled) {
+            var element = document.getElementById("scrollBottom");
+            element.scrollTop = element.scrollHeight;
+        }
+    }
+
+    $("#scrollBottom").on('scroll', function () {
+        scrolled = true;
+    });
+
+    // setInterval(function () {
+    //     const out = document.getElementById("scrollBottom")
+    //     // allow 1px inaccuracy by adding 1
+    //     const isScrolledToBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 1
+    //     // scroll to bottom if isScrolledToBottom is true
+    //     if (isScrolledToBottom) {
+    //         out.scrollTop = out.scrollHeight - out.clientHeight
+    //     }
+    // }, 500)
+
+
+    // useEffect(() => {
+    //     setUpdateMsgs(false)
+    // }, [updateMsgs])
+
+    function onkeyup(e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('#chat-message-submit').click();
+        }
+    }
+
+
+    //the below doesnt work because the DOM object has not yet created so we cannot have this
+    // but u can write them inside any function as they wont get executed right away:
+    // document.getElementById('#chat-message-input').focus();
+    // document.getElementById('#chat-message-input').onkeyup = function (e) {
+    //     if (e.keyCode === 13) {  // enter, return
+    //         document.querySelector('#chat-message-submit').click();
+    //     }
+    // };
 
     return (
-        <div className="container">
-            <Grid container spacing={1} >
-                <Grid item xs={4}>
-                    {renderContactsButtons()}
-                </Grid>
-                <Grid item xs={8}>
-                    <MsgBox msgs={sortedMsg} myid={myId} />
-                </Grid>
-            </Grid>
+        <div>
+            {/* <Grid className="chat-box" container spacing={1} >
+                <Grid item xs={4}> */}
+            <div className="chat-box">
+                <div className="grid-container">
+                    <div class="contact-container">
+                        {renderContactsButtons()}
+                    </div>
+                    {/* </Grid>
+                <Grid item xs={8} > */}
+                    <div className="msg-container" id="scrollBottom">
+                        <MsgBox msgs={sortedMsg} myid={myId} />
+                    </div>
+                </div>
+                <div className="text-input-container">
+                    <input type="text" id="chat-message-input" focus onKeyUp={onkeyup} className="inputtxt container" name="msg" value={inputText} onChange={handleChangeInput} />
+                    <input type="submit" id="chat-message-submit" onClick={handleTextSubmit} />
+                </div>
+            </div>
+            {/* </Grid>
+            </Grid> */}
         </div>
     )
 }

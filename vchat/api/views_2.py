@@ -1,3 +1,4 @@
+from pyexpat.errors import messages
 from django.shortcuts import render
 from rest_framework import generics, status  
 from rest_framework.views import APIView
@@ -18,6 +19,8 @@ from .serializers import MessageSerializer , FriendsSerializer
 # here we will have codes related to models 
 # key here is session_key
 # user_id is the id given to the User Authentication model
+
+
 
 class FriendsList(APIView):
     def post(self, request , format=None):
@@ -88,7 +91,29 @@ class FetchMessages(APIView):
 
 
 
-
+class InputText(APIView):
+    def post(self, request, format=None):
+        if loggedIn(request):
+            post_data = request.data
+            self.user_id=User.objects.filter(id= post_data["user_id"])[0]
+            self.contact_id=User.objects.filter(id=post_data["contact_id"])[0]
+            self.text=post_data["text"]
+            print("inputtext")
+            print(self.user_id , self.contact_id , self.text)
+            msg_obj=Messages(msg_from=self.user_id ,msg_to=self.contact_id ,
+                text=self.text
+            )
+            self.msg={}
+            msg_obj.save(msg_obj , self.msg)
+            push_to_msgs(msg_obj , self.msg)
+            return Response({
+                "lets_go":"yooy",
+                "msg_id":msg_obj.id,
+                "msg_data":self.msg
+            } , status=status.HTTP_200_OK)
+        else:
+            print("user not logged")
+            return Response({"something went wrong":False }, status=status.HTTP_204_NO_CONTENT)
 
 
 
