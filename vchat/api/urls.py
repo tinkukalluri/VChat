@@ -18,4 +18,6 @@ urlpatterns = [
     path('friends' , views_2.FriendsList.as_view()),
     path('fetchmsgs' , views_2.FetchMessages.as_view()),
     path('inputtext' , views_2.InputText.as_view()),
+    path('searchuser' , views_2.SearchUser.as_view()),
+    path('addfriend' , views_2.AddFriend.as_view())
 ]

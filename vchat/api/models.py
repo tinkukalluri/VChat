@@ -24,29 +24,14 @@ class Messages(models.Model):
         # self.modified = timezone.now()
         return super(Messages , self).save(*args, **kwargs)
 
-def generate_unique_code_friends():
-    length = 6
-    while True:
-        group_name = ''.join(random.choices(string.ascii_uppercase, k=length))
-        if Friends.objects.filter(group_name=group_name).count() == 0:
-            break
-    return group_name
 
 class Friends(models.Model):
     user_1= models.ForeignKey(User , on_delete=models.CASCADE , related_name="user_1_rel")
     user_2= models.ForeignKey(User , on_delete=models.CASCADE , related_name="user_2_rel")
-    group_name= models.CharField(max_length=12, default=generate_unique_code_friends)
-    close_friend=models.BooleanField()
+    close_friend=models.BooleanField(default=False)
 
 # extended Django Auth user...
-def generate_unique_code_User_2():
-    length = 6
-    while True:
-        group_name = ''.join(random.choices(string.ascii_uppercase, k=length))
-        if User.objects.filter(group_name=group_name).count() == 0:
-            break
-    return group_name
+
 
 class User_2(models.Model):
     user = models.OneToOneField(User , on_delete=models.CASCADE)
-    group_name= models.CharField(max_length=12, default=generate_unique_code_User_2 ,null=False)

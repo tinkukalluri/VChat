@@ -30,15 +30,26 @@ var maxSpeed = {
     helicopter: 400,
     rocket: 8 * 60 * 60
 };
-var sortable = [];
-for (var vehicle in maxSpeed) {
-    console.log(vehicle)
-    sortable.push([vehicle, maxSpeed[vehicle]]);
-}
+// var sortable = [];
+// for (var vehicle in maxSpeed) {
+//     console.log(vehicle)
+//     sortable.push([vehicle, maxSpeed[vehicle]]);
+// }
 
-sortable.sort(function (a, b) {
-    return a[1] - b[1];
-});
+// sortable.sort(function (a, b) {
+//     return a[1] - b[1];
+// });
 
-console.log(sortable)
-console.log(maxSpeed.car)
+// console.log(sortable)
+// console.log(maxSpeed.car)
+
+// let keys = Object.keys(maxSpeed)
+
+// console.log(keys);
+// console.log(keys.indexOf("airplane"))
+
+let v1 = "29"
+
+friends_key = ["7", "29", "32"]
+
+console.log(friends_key.indexOf("29"))

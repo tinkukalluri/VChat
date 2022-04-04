@@ -41,7 +41,7 @@ export default function MsgBox(props) {
         let myid = props.myid;
         if (myid === entries[msg][1].msg_from) {
             return (
-                <div class="container sender">
+                <div class="_container sender">
                     <img class="right" src={img} alt="sender" />
                     <div class="user-sender">
                         {entries[msg][1].text}
@@ -51,7 +51,7 @@ export default function MsgBox(props) {
             )
         } else
             return (
-                <div class="container receiver">
+                <div class="_container receiver">
                     <img class="left" src={process.env.PUBLIC_URL + "images/1.jpeg"} alt="reciver" />
                     <div class="contact-sender">
                         {entries[msg][1].text}

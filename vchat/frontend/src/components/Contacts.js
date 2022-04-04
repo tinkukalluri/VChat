@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 
 import css from "./css/contacts.css";
 import "./css/msgbox.css";
-
+import './css/contacts_align.css'
 
 import MsgBox from "./MsgBox.js"
 
@@ -52,6 +52,7 @@ export default function Contacts(props) {
     const [contact_id, setContactId] = useState(-1)
     const [updateMsgs, setUpdateMsgs] = useState(false)
     const [websocketconn, setWebSocketConn] = useState(false)
+    const [searchUser, setSearchUser] = useState([])
 
 
 
@@ -222,11 +223,19 @@ export default function Contacts(props) {
         //console.log(entries);
         for (var friend in entries) {
             // //console.log(friend)
+            // btn.push(
+            //     <button class="btn-contacts" value={entries[friend][0]} onClick={handleContactButton}>
+            //         <span><img src="../../images/4_c.jpeg" alt="photo" srcset="" /></span>
+            //         <span class="btn-text">{entries[friend][1]}</span>
+            //     </button>
+            // );
             btn.push(
-                <button class="btn-contacts" value={entries[friend][0]} onClick={handleContactButton}>
-                    <span><img src="../../images/4_c.jpeg" alt="photo" srcset="" /></span>
-                    <span class="btn-text">{entries[friend][1]}</span>
-                </button>
+                <li>
+                    <button class="btn-contacts" value={entries[friend][0]} onClick={handleContactButton}>
+                        <span><img src="../../images/4_c.jpeg" alt="photo" srcset="" /></span>
+                        <span class="btn-text">{entries[friend][1]}</span>
+                    </button>
+                </li>
             );
 
         }
@@ -317,43 +326,89 @@ export default function Contacts(props) {
     }
 
 
-    //the below doesnt work because the DOM object has not yet created so we cannot have this
-    // but u can write them inside any function as they wont get executed right away:
-    // document.getElementById('#chat-message-input').focus();
-    // document.getElementById('#chat-message-input').onkeyup = function (e) {
-    //     if (e.keyCode === 13) {  // enter, return
-    //         document.querySelector('#chat-message-submit').click();
-    //     }
-    // };
+
+    function handleAddFriendButton(e) {
+        let btn_value = e.currentTarget.value;
+        console.log("btn-value", btn_value);
+        const request = new Request("/api/addfriend", {
+            method: 'POST',
+            headers: { "Content-Type": "application/json", 'X-CSRFToken': csrftoken },
+            mode: 'same-origin',// Do not send CSRF token to another domain.
+            body: JSON.stringify({
+                user_id: myId,
+                customer_id: btn_value
+            })
+        })
+        fetch(request).then((response) => {
+            return response.json()
+        }).then(data => {
+            console.log("data from add", data)
+            if (!data['added']) {
+
+            } else {
+                delete data['added']
+                let temp_friends = { ...friends, ...data }
+                setFriends(temp_friends)
+            }
+        })
+    }
 
 
+    function handleSearch(e) {
+        let input = e.target.value;
+        const request = new Request("/api/searchuser", {
+            method: 'POST',
+            headers: { "Content-Type": "application/json", 'X-CSRFToken': csrftoken },
+            mode: 'same-origin',// Do not send CSRF token to another domain.
+            body: JSON.stringify({
+                search_user: input
+            })
+        })
+        let list = []
+        fetch(request).then((response) => {
+            return response.json();
+        }).then((data) => {
+            console.log(data);
+            if (Object.keys(data).length === 0) {
+                setSearchUser(list)
+            } else {
+                let keys = Object.keys(data)
+                let key_len = keys.length
+                var friends_keys = Object.keys(friends)
+                // console.log("search_keys", keys)
+                // console.log("friends_keys", friends_keys)
+                for (let i = 0; i < key_len; i++) {
+                    let is_friend = false;
+                    // console.log("indexOF", friends_keys.indexOf([keys[i]]))
+                    if (friends_keys.indexOf(keys[i]) == -1) {
+                        // console.log(typeof keys[i])
+                        console.log("not friends")
+                    } else {
+                        is_friend = true;
+                        console.log("are friends")
+                    }
+                    list.push(
 
+                        <div className="user-request-result" >
+                            <div className="user-name">{data[keys[i]]}</div>
 
-    // Implementing Websocket::
-    // const roomName = JSON.parse(document.getElementById('room-name').textContent);
+                            {is_friend ? null : <button className="user-add-button" value={keys[i]} onClick={handleAddFriendButton}>+add</button>}
 
+                        </div >
+                    )
+                }
+                setSearchUser(list)
+                console.log("list data", list);
+            }
+        })
 
-    // document.querySelector('#chat-message-input').focus();
-    // document.querySelector('#chat-message-input').onkeyup = function (e) {
-    //     if (e.keyCode === 13) {  // enter, return
-    //         document.querySelector('#chat-message-submit').click();
-    //     }
-    // };
-
-    // document.querySelector('#chat-message-submit').onclick = function (e) {
-    //     const messageInputDom = document.querySelector('#chat-message-input');
-    //     const message = messageInputDom.value;
-    //     chatSocket.send(JSON.stringify({
-    //         'message': message
-    //     }));
-    //     messageInputDom.value = '';
-    // };
+    }
 
     return (
-        <div>
-            <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+        <div className="chat-box">
+            <nav class="navbar navbar-expand-lg navbar-light bg-dark _z-index">
                 <div class="container-fluid">
-                    <a class="navbar-brand text-white" href="#">Navbar</a>
+                    <a class="navbar-brand text-white" href="#">Vchat</a>
                     <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                         aria-label="Toggle navigation">
@@ -385,10 +440,15 @@ export default function Contacts(props) {
                                 <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
                             </li>
                         </ul>
-                        <form class="d-flex">
-                            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-                            <button class="btn btn-outline-success" type="submit">Search</button>
-                        </form>
+                        <div class="search-box">
+                            <form class="d-flex">
+                                <input class="form-control me-2" type="search" placeholder="Add friend" aria-label="Search" onChange={handleSearch} />
+                                <button class="btn btn-outline-success" type="submit">Search</button>
+                            </form>
+                            <div class="results bg-dark">
+                                {searchUser}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -396,39 +456,19 @@ export default function Contacts(props) {
             <nav class="navbar-primary">
                 <a href="#" class="btn-expand-collapse">show_c<span></span></a>
                 <ul class="navbar-primary-menu">
-                    <li>
-                        <a href="#"><span class="glyphicon glyphicon-list-alt"></span><span
-                            class="nav-label">Dashboard</span></a>
-                        <a href="#"><span class="glyphicon glyphicon-envelope"></span><span class="nav-label">Profile</span></a>
-                        <a href="#"><span class="glyphicon glyphicon-cog"></span><span class="nav-label">Settings</span></a>
-                        <a href="#"><span class="glyphicon glyphicon-film"></span><span
-                            class="nav-label">Notification</span></a>
-                        <a href="#"><span class="glyphicon glyphicon-calendar"></span><span class="nav-label">Monitor</span></a>
-                    </li>
+                    {renderContactsButtons()}
                 </ul>
             </nav>
-
-            <div class="main-content">
-                <div className="chat-box">
-                    <div className="grid-container">
-                        <div class="contact-container">
-                            {renderContactsButtons()}
-                        </div>
-                        {/* </Grid>
-                            <Grid item xs={8}> */}
-                        <div className="msg-container" id="scrollBottom">
-                            <MsgBox msgs={sortedMsg} myid={myId} />
-                        </div>
-                    </div>
-                    <div className="text-input-container">
-                        <input type="text" id="chat-message-input" focus onKeyUp={onkeyup} className="inputtxt container" name="msg"
-                            value={inputText} onChange={handleChangeInput} />
-                        <input type="submit" id="chat-message-submit" onClick={handleTextSubmit} />
-                    </div>
+            <div className="text-input-container">
+                <div className="msg-container" id="scrollBottom">
+                    <MsgBox msgs={sortedMsg} myid={myId} />
+                </div>
+                <div className="text-input-field d-flex">
+                    <input type="text" id="chat-message-input" focus onKeyUp={onkeyup} className="inputtxt container" name="msg"
+                        value={inputText} onChange={handleChangeInput} />
+                    <input type="submit" id="chat-message-submit" onClick={handleTextSubmit} />
                 </div>
             </div>
-
-
-        </div >
+        </div>
     )
 }

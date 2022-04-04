@@ -34,6 +34,12 @@ class FriendsList(APIView):
                 friend_name=row.user_2.username
                 print(friend_name)
                 dic[row.user_2.id]=friend_name
+            querySet=set(Friends.objects.filter(user_2=my_id))
+            for row in querySet:
+                print("id of front::"+str(row.user_1.id))
+                friend_name=row.user_1.username
+                print(friend_name)
+                dic[row.user_1.id]=friend_name
             return Response(dic , status=status.HTTP_200_OK)
         else:
             return Response({"user":"user_is_not_in_sesssion[key]" } , status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION)
@@ -74,8 +80,6 @@ class FetchMessages(APIView):
                 print("user authenticated by session")
                 if Friends.objects.filter(user_1=contact_id , user_2=user_id).exists() or Friends.objects.filter(user_1=user_id , user_2=contact_id).exists() :
                     print(f'{user_id} and {contact_id} are friends')
-                    self.request.session['group_name']= Friends.objects.filter(user_1=contact_id , user_2=user_id)[0].group_name
-                    print("fetchmsg group name::"+self.request.session['group_name'])
                     querySet=Messages.objects.filter(msg_from=user_id , msg_to=contact_id).order_by('-id')
                     if querySet.exists():
                         for row in querySet:
@@ -117,5 +121,40 @@ class InputText(APIView):
             return Response({"something went wrong":False }, status=status.HTTP_204_NO_CONTENT)
 
 
+class SearchUser(APIView):
+    def post(self, request , format=None):
+        post_data = request.data
+        search_user= post_data["search_user"]
+        if(search_user=='' or search_user==" "):
+            return Response({} , status=status.HTTP_200_OK)
+        print("search_user"+search_user)
+        resultSet=User.objects.filter(username__contains=search_user)
+        self.users={}
+        for row in resultSet:
+            self.users[row.id]=row.username
+        return Response(self.users, status=status.HTTP_200_OK)
 
 
+
+class AddFriend(APIView):
+    def post(self, request , format=None):
+        if loggedIn(request):    
+            post_data=request.data
+            self.user_1=post_data['user_id']
+            self.user_2=post_data['customer_id']
+            self.user_obj=User.objects.filter(id=self.user_1)[0]
+            self.customer_obj=User.objects.filter(id=self.user_2)[0]
+            self.check_for_frnds=Friends.objects.filter(user_1=self.user_obj , user_2=self.customer_obj).exists() or Friends.objects.filter(user_1=self.customer_obj , user_2=self.user_obj).exists()
+            print("check_for_frnds" , self.check_for_frnds)
+            if(self.check_for_frnds):
+                return Response({"added":False }, status=status.HTTP_200_OK)
+            friend_obj=Friends(user_1=self.user_obj , user_2=self.customer_obj)
+            friend_obj.save()
+            return Response({"added":True , friend_obj.user_2.id: friend_obj.user_2.username} , status=status.HTTP_200_OK)
+        else:
+            print("user not logged")
+            return Response({ "added":False ,"something went wrong":False }, status=status.HTTP_204_NO_CONTENT)
+
+
+def check_for_frnds(request):
+    pass
