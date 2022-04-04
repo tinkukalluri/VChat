@@ -13,6 +13,7 @@ import MsgBox from "./MsgBox.js"
 
 
 
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -34,6 +35,13 @@ var csrftoken = ""
 var count = 0;
 var _contact_id = -1;
 var scrolled = false;
+var chatSocket = null;
+count
+
+chatSocket = new WebSocket(
+    'ws://'
+    + window.location.host + '/'
+);
 
 export default function Contacts(props) {
     const [myId, setMyId] = useState(-1)
@@ -43,19 +51,82 @@ export default function Contacts(props) {
     const [inputText, setInputText] = useState('')
     const [contact_id, setContactId] = useState(-1)
     const [updateMsgs, setUpdateMsgs] = useState(false)
+    const [websocketconn, setWebSocketConn] = useState(false)
+
+
 
     useEffect(() => {
         // because we only want this to happen once when the component is
         // mounted and not everytime the component is updated
         if (count === 0) {
-            console.log("in use effect of COntacts.js")
+            //console.log("in use effect of COntacts.js")
             csrftoken = getCookie('csrftoken');
-            console.log("csrf_token::" + csrftoken);
+            //console.log("csrf_token::" + csrftoken);
+            count++;
+
             fetchMyId()
             fetchFriendsList();
-            count++;
+            if (chatSocket != null) {
+                console.log("in not null")
+            }
+
         }
     })
+
+    useEffect(() => {
+        console.log("websocketconn::" + websocketconn)
+        console.log('myId:' + myId)
+        if (websocketconn && myId != -1) {
+            console.log("executing ")
+            _send(JSON.stringify({
+                'room_name': myId
+            }));
+        }
+    }, [websocketconn, myId]);
+
+
+    let _send = function (message) {
+        _waitForConnection(function () {
+            chatSocket.send(message);
+        }, 1000);
+    };
+
+    let _waitForConnection = function (callback, interval) {
+        if (chatSocket.readyState === 1) {
+            callback();
+        } else {
+            var that = this;
+            // optional: implement backoff for interval here
+            setTimeout(function () {
+                _waitForConnection(callback, interval);
+            }, interval);
+        }
+    };
+
+
+
+
+    chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        console.log("message recieved", data);
+        if (typeof data['conn_status'] !== 'undefined') {
+            console.log("inside conn_status", data.conn_status);
+            setWebSocketConn(true)
+        } else {
+            console.log(data)
+            delete data['type']
+            let tempMsg = { ...fetchmsg, ...data }
+            //console.log("tempMsg", tempMsg);
+            console.log("after mssg received and conncatenated::", tempMsg)
+            setFetchMsg(tempMsg)
+        }
+    };
+
+
+    chatSocket.onclose = function (e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
 
     function fetchMyId() {
         const request = new Request("/api/myid", {
@@ -71,7 +142,7 @@ export default function Contacts(props) {
         fetch(request).then((response) => {
             return response.json();
         }).then((data) => {
-            console.log("fetchMyId::" + data.myId);
+            //console.log("fetchMyId::" + data.myId);
             setMyId(data.myId);
         })
     }
@@ -89,7 +160,7 @@ export default function Contacts(props) {
         fetch(request).then((response) => {
             return response.json();
         }).then((data) => {
-            console.log("my friends list", data)
+            //console.log("my friends list", data)
             setFriends(data)
         })
     }
@@ -97,9 +168,9 @@ export default function Contacts(props) {
 
 
     function handleContactButton(e) {
-        console.log(typeof e.currentTarget)
+        //console.log(typeof e.currentTarget)
         if (typeof e.currentTarget !== 'undefined') {
-            console.log("got into e.currentTarget.value")
+            //console.log("got into e.currentTarget.value")
             _contact_id = e.currentTarget.value
             setContactId(e.currentTarget.value);
         }
@@ -115,7 +186,7 @@ export default function Contacts(props) {
         fetch(request).then((response) => {
             return response.json();
         }).then((data) => {
-            console.log(data);
+            //console.log(data);
             setFetchMsg(data);
             setUpdateMsgs(false);
             scrolled = false;
@@ -131,25 +202,26 @@ export default function Contacts(props) {
     function msgIdSort() {
         let data = fetchmsg
         let entries = Object.entries(data)
-        console.log("msgIdSort before sort", entries)
+        //console.log("msgIdSort before sort", entries)
         entries.sort((a, b) => {
             return a[0] - b[0]
             // return b[0] - a[0]
         })
         data = Object.fromEntries(entries)
-        console.log("after sorting object", data)
+        //console.log("after sorting object", data)
         setSortedMsg(data)
+        scrolled = false
     }
 
 
     function renderContactsButtons() {
         var btn = []
-        console.log("keys::" + Object.keys(friends))
-        console.log("keys::" + Object.values(friends))
+        //console.log("keys::" + Object.keys(friends))
+        //console.log("keys::" + Object.values(friends))
         var entries = Object.entries(friends)
-        console.log(entries);
+        //console.log(entries);
         for (var friend in entries) {
-            // console.log(friend)
+            // //console.log(friend)
             btn.push(
                 <button class="btn-contacts" value={entries[friend][0]} onClick={handleContactButton}>
                     <span><img src="../../images/4_c.jpeg" alt="photo" srcset="" /></span>
@@ -158,7 +230,7 @@ export default function Contacts(props) {
             );
 
         }
-        console.log("btn", btn)
+        //console.log("btn", btn)
         return <>
             {btn}
         </>;
@@ -172,11 +244,11 @@ export default function Contacts(props) {
     function handleChangeInput(e) {
         let input = e.target.value;
         setInputText(input)
-        // console.log(input)
+        // //console.log(input)
     }
 
     function handleTextSubmit() {
-        console.log("clicked......................")
+        //console.log("clicked......................")
         const request = new Request("/api/inputtext", {
             method: 'POST',
             headers: { "Content-Type": "application/json", 'X-CSRFToken': csrftoken },
@@ -195,19 +267,28 @@ export default function Contacts(props) {
                 conosle.log('looks like something went wrong')
             }
         }).then((data) => {
-            console.log(data)
-            handleContactButton({})
+            //console.log(data)
+            // so we concatinated two objects using spread operator
+            // https://www.delftstack.com/howto/javascript/javascript-append-to-object/
+            let tempMsg = { ...fetchmsg, ...data.msg_data }
+            //console.log("tempMsg", tempMsg);
+            setFetchMsg(tempMsg)
+            scrolled = false;
+            // handleContactButton({})
+            chatSocket.send(JSON.stringify({
+                ...data.msg_data
+            }));
             setInputText("")
             setUpdateMsgs(true)
         })
     }
 
-    function updateScroll() {
-        var element = document.getElementById("yourDivID");
-        element.scrollTop = element.scrollHeight;
-    }
+    // function updateScroll() {
+    //     var element = document.getElementById("scrollBottom");
+    //     element.scrollTop = element.scrollHeight;
+    // }
 
-    setInterval(updateScroll, 1000);
+
 
     function updateScroll() {
         if (!scrolled) {
@@ -216,19 +297,13 @@ export default function Contacts(props) {
         }
     }
 
+    setInterval(updateScroll, 1000);
+
     $("#scrollBottom").on('scroll', function () {
         scrolled = true;
     });
 
-    // setInterval(function () {
-    //     const out = document.getElementById("scrollBottom")
-    //     // allow 1px inaccuracy by adding 1
-    //     const isScrolledToBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 1
-    //     // scroll to bottom if isScrolledToBottom is true
-    //     if (isScrolledToBottom) {
-    //         out.scrollTop = out.scrollHeight - out.clientHeight
-    //     }
-    // }, 500)
+
 
 
     // useEffect(() => {
@@ -251,28 +326,109 @@ export default function Contacts(props) {
     //     }
     // };
 
+
+
+
+    // Implementing Websocket::
+    // const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+
+    // document.querySelector('#chat-message-input').focus();
+    // document.querySelector('#chat-message-input').onkeyup = function (e) {
+    //     if (e.keyCode === 13) {  // enter, return
+    //         document.querySelector('#chat-message-submit').click();
+    //     }
+    // };
+
+    // document.querySelector('#chat-message-submit').onclick = function (e) {
+    //     const messageInputDom = document.querySelector('#chat-message-input');
+    //     const message = messageInputDom.value;
+    //     chatSocket.send(JSON.stringify({
+    //         'message': message
+    //     }));
+    //     messageInputDom.value = '';
+    // };
+
     return (
         <div>
-            {/* <Grid className="chat-box" container spacing={1} >
-                <Grid item xs={4}> */}
-            <div className="chat-box">
-                <div className="grid-container">
-                    <div class="contact-container">
-                        {renderContactsButtons()}
-                    </div>
-                    {/* </Grid>
-                <Grid item xs={8} > */}
-                    <div className="msg-container" id="scrollBottom">
-                        <MsgBox msgs={sortedMsg} myid={myId} />
+            <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand text-white" href="#">Navbar</a>
+                    <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                        aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item text-white">
+                                <a class="nav-link text-white active" aria-current="page" href="#">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="#">Link</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    Dropdown
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="#">Action</a></li>
+                                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+                                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                            </li>
+                        </ul>
+                        <form class="d-flex">
+                            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+                            <button class="btn btn-outline-success" type="submit">Search</button>
+                        </form>
                     </div>
                 </div>
-                <div className="text-input-container">
-                    <input type="text" id="chat-message-input" focus onKeyUp={onkeyup} className="inputtxt container" name="msg" value={inputText} onChange={handleChangeInput} />
-                    <input type="submit" id="chat-message-submit" onClick={handleTextSubmit} />
+            </nav>
+            {/* vertical nav bar implementation */}
+            <nav class="navbar-primary">
+                <a href="#" class="btn-expand-collapse">show_c<span></span></a>
+                <ul class="navbar-primary-menu">
+                    <li>
+                        <a href="#"><span class="glyphicon glyphicon-list-alt"></span><span
+                            class="nav-label">Dashboard</span></a>
+                        <a href="#"><span class="glyphicon glyphicon-envelope"></span><span class="nav-label">Profile</span></a>
+                        <a href="#"><span class="glyphicon glyphicon-cog"></span><span class="nav-label">Settings</span></a>
+                        <a href="#"><span class="glyphicon glyphicon-film"></span><span
+                            class="nav-label">Notification</span></a>
+                        <a href="#"><span class="glyphicon glyphicon-calendar"></span><span class="nav-label">Monitor</span></a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="main-content">
+                <div className="chat-box">
+                    <div className="grid-container">
+                        <div class="contact-container">
+                            {renderContactsButtons()}
+                        </div>
+                        {/* </Grid>
+                            <Grid item xs={8}> */}
+                        <div className="msg-container" id="scrollBottom">
+                            <MsgBox msgs={sortedMsg} myid={myId} />
+                        </div>
+                    </div>
+                    <div className="text-input-container">
+                        <input type="text" id="chat-message-input" focus onKeyUp={onkeyup} className="inputtxt container" name="msg"
+                            value={inputText} onChange={handleChangeInput} />
+                        <input type="submit" id="chat-message-submit" onClick={handleTextSubmit} />
+                    </div>
                 </div>
             </div>
-            {/* </Grid>
-            </Grid> */}
-        </div>
+
+
+        </div >
     )
 }

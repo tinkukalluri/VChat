@@ -21,7 +21,6 @@ from .serializers import MessageSerializer , FriendsSerializer
 # user_id is the id given to the User Authentication model
 
 
-
 class FriendsList(APIView):
     def post(self, request , format=None):
         if self.request.session.get('key'):
@@ -75,6 +74,8 @@ class FetchMessages(APIView):
                 print("user authenticated by session")
                 if Friends.objects.filter(user_1=contact_id , user_2=user_id).exists() or Friends.objects.filter(user_1=user_id , user_2=contact_id).exists() :
                     print(f'{user_id} and {contact_id} are friends')
+                    self.request.session['group_name']= Friends.objects.filter(user_1=contact_id , user_2=user_id)[0].group_name
+                    print("fetchmsg group name::"+self.request.session['group_name'])
                     querySet=Messages.objects.filter(msg_from=user_id , msg_to=contact_id).order_by('-id')
                     if querySet.exists():
                         for row in querySet:

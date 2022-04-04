@@ -14,17 +14,17 @@ export default function MsgBox(props) {
     const [msgs, setMsgs] = useState(props.msgs)
 
     // useEffect(() => {
-    //     console.log(msgs)
+    //     //console.log(msgs)
     // }, [msgs])
-    console.log(props.msgs)
+    //console.log(props.msgs)
 
     function renderMsgs() {
         let list = []
         var entries = Object.entries(props.msgs)
-        console.log("entries from Msgbox", entries)
+        //console.log("entries from Msgbox", entries)
         for (let msg in entries) {
-            console.log("renderMsg()")
-            console.log(msg)
+            //console.log("renderMsg()")
+            //console.log(msg)
             list.push(
                 // <Typography variant="h6" compact="h6">
                 //     {"id" + entries[msg][0] + "   msg_from" + entries[msg][1].msg_from + "   msg_to" + entries[msg][1].msg_to + "  " + entries[msg][1].text + "   " + entries[msg][1].send_on}
@@ -33,7 +33,7 @@ export default function MsgBox(props) {
                 classPlacer(entries, msg)
             )
         }
-        console.log("list from MsgBox ", list);
+        //console.log("list from MsgBox ", list);
         return list;
     }
 
@@ -52,7 +52,6 @@ export default function MsgBox(props) {
         } else
             return (
                 <div class="container receiver">
-                    {console.log("process.env::", process.env)}
                     <img class="left" src={process.env.PUBLIC_URL + "images/1.jpeg"} alt="reciver" />
                     <div class="contact-sender">
                         {entries[msg][1].text}

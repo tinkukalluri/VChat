@@ -1,4 +1,8 @@
-dic={1:"tinku"}
+def f1(a, b, c):
+    print(a)
+    print(b)
+    print(c)
 
+d = {"a": 1, "b": 2, "c": 3}
 
-print(dic.get(1))
+f1(**d)
