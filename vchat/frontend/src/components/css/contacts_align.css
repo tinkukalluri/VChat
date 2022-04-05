@@ -7,8 +7,8 @@
 
 
 .search-box{
-
-    
+    position:relative;
+    top:6px;
 
 }
 
@@ -19,7 +19,7 @@
     max-height:210px;
     overflow-y:scroll;
     width:100%;
-    margin-top: 8.1px;
+    /* margin-top: 8.1px; */
 }
 
 .search-box .results .p{
@@ -27,6 +27,17 @@
 }
 
 .user-add-button{
-    /* float: right */
+    border: 1px solid black;
+    background-color: grey;
+    border-radius: 50px;
 }
 
+.user-add-button:hover{
+    background-color:aquamarine;
+}
+
+._d-flex{
+    display: flex!important;
+    justify-content: space-between;
+    flex-direction: row;
+}

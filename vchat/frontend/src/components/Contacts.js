@@ -389,7 +389,7 @@ export default function Contacts(props) {
                     }
                     list.push(
 
-                        <div className="user-request-result" >
+                        <div className="user-request-result _d-flex" >
                             <div className="user-name">{data[keys[i]]}</div>
 
                             {is_friend ? null : <button className="user-add-button" value={keys[i]} onClick={handleAddFriendButton}>+add</button>}
@@ -454,7 +454,7 @@ export default function Contacts(props) {
             </nav>
             {/* vertical nav bar implementation */}
             <nav class="navbar-primary">
-                <a href="#" class="btn-expand-collapse">show_c<span></span></a>
+                <a href="#" class="btn-expand-collapse">Contacts<span></span></a>
                 <ul class="navbar-primary-menu">
                     {renderContactsButtons()}
                 </ul>
