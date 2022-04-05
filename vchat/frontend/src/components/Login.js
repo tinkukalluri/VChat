@@ -116,9 +116,19 @@ export default function Login() {
 
     function renderSignout() {
         return (
-            <Grid item xs={6} align="center">
+            <Grid item xs={2} align="center">
                 <Button variant="contained" color="secondary" onClick={handleSignout}>
                     Signout
+                </Button>
+            </Grid>
+        )
+    }
+
+    function renderContacts() {
+        return (
+            <Grid item xs={2} align="center">
+                <Button variant="contained" color="default" to="/contacts" component={Link}>
+                    Contacts
                 </Button>
             </Grid>
         )
@@ -169,7 +179,8 @@ export default function Login() {
                 <Grid item xs={12} align="center">
                     <Password className="_pass" _onChange={handleTextFieldPasswordChange} clear={clear} />
                 </Grid>
-                <Grid item xs={6} align="center">
+                <Grid iteam xs={3}></Grid>
+                <Grid item xs={2} align="center">
                     <Button
                         variant="contained"
                         color="primary"
@@ -178,7 +189,9 @@ export default function Login() {
                         Signin
                     </Button>
                 </Grid>
+                {logged ? renderContacts() : null}
                 {logged ? renderSignout() : null}
+                <Grid iteam xs={3}></Grid>
                 {useEffect(() => {
                     console.log("logged_near_grid::" + logged)
                 }, [logged])}

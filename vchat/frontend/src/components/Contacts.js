@@ -32,11 +32,9 @@ function getCookie(name) {
 
 // Global variables
 var csrftoken = ""
-var count = 0;
 var _contact_id = -1;
 var scrolled = false;
 var chatSocket = null;
-count
 
 chatSocket = new WebSocket(
     'ws://'
@@ -57,33 +55,52 @@ export default function Contacts(props) {
 
 
     useEffect(() => {
+        console.log("component mounted......................................................")
         // because we only want this to happen once when the component is
         // mounted and not everytime the component is updated
-        if (count === 0) {
-            //console.log("in use effect of COntacts.js")
-            csrftoken = getCookie('csrftoken');
-            //console.log("csrf_token::" + csrftoken);
-            count++;
+        //console.log("in use effect of COntacts.js")
+        csrftoken = getCookie('csrftoken');
+        //console.log("csrf_token::" + csrftoken);
 
-            fetchMyId()
-            fetchFriendsList();
-            if (chatSocket != null) {
-                console.log("in not null")
-            }
-
+        fetchMyId()
+        fetchFriendsList();
+        if (chatSocket != null) {
+            console.log("in not null")
         }
-    })
+        function updateScroll() {
+            if (!scrolled) {
+                var element = document.getElementById("scrollBottom");
+                element.scrollTop = element.scrollHeight;
+            }
+        }
+
+        setInterval(updateScroll, 1000);
+
+        $("#scrollBottom").on('scroll', function () {
+            scrolled = true;
+        });
+
+        return () => {
+            console.log("component unmounted................................................")
+        }
+    }, [])
+
+
+    // useEffect(() => {
+    //     console.log("rendered....................................")
+    // })
+
 
     useEffect(() => {
-        console.log("websocketconn::" + websocketconn)
+        // console.log("websocketconn::" + websocketconn)
         console.log('myId:' + myId)
-        if (websocketconn && myId != -1) {
+        if (myId != -1) {
             console.log("executing ")
             _send(JSON.stringify({
                 'room_name': myId
             }));
         }
-    }, [websocketconn, myId]);
+    }, [myId]);
 
 
     let _send = function (message) {
@@ -112,7 +129,6 @@ export default function Contacts(props) {
         console.log("message recieved", data);
         if (typeof data['conn_status'] !== 'undefined') {
             console.log("inside conn_status", data.conn_status);
-            setWebSocketConn(true)
         } else {
             console.log(data)
             delete data['type']
@@ -299,18 +315,6 @@ export default function Contacts(props) {
 
 
 
-    function updateScroll() {
-        if (!scrolled) {
-            var element = document.getElementById("scrollBottom");
-            element.scrollTop = element.scrollHeight;
-        }
-    }
-
-    setInterval(updateScroll, 1000);
-
-    $("#scrollBottom").on('scroll', function () {
-        scrolled = true;
-    });
 
 
 
@@ -404,6 +408,22 @@ export default function Contacts(props) {
 
     }
 
+
+    function handleSignout() {
+        const request = new Request("/api/logout", {
+            method: 'POST',
+            headers: { "Content-Type": "application/json", 'X-CSRFToken': csrftoken },
+            mode: 'same-origin',// Do not send CSRF token to another domain.
+        })
+
+        fetch(request).then((response) => {
+            if (response.ok) {
+                console.log('Loggedout')
+                window.location.replace('/')
+            }
+        })
+    }
+
     return (
         <div className="chat-box">
             <nav class="navbar navbar-expand-lg navbar-light bg-dark _z-index">
@@ -437,7 +457,10 @@ export default function Contacts(props) {
                                 </ul>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                                <a class="nav-link disabled text-white" href="" tabindex="-1" aria-disabled="true">Disabled</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="#" tabindex="-1" onClick={handleSignout}>Sign out</a>
                             </li>
                         </ul>
                         <div class="search-box">
