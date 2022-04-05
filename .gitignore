@@ -1,5 +1,5 @@
 vchat/db.sqlite3
 images
-.jpeg
-.png
-.jpg
+*.jpeg
+*.png
+*.jpg
